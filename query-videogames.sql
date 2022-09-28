@@ -182,9 +182,26 @@ where (videogames.release_date = (select min(videogames.release_date) from video
 
 
 -- 11 Selezionare i dati del videogame (id, name, release_date, totale recensioni) con più recensioni (videogame id : 398)
-
+select TOP 1 COUNT(reviews.id) as counter, videogames.id , videogames.name , videogames.release_date
+from videogames JOIN reviews ON reviews.videogame_id = videogames.id
+group by videogames.id , videogames.name , videogames.release_date
+order by counter desc;
 
 
 -- 12 Selezionare la software house che ha vinto più premi tra il 2015 e il 2016 (software house id : 1)
+select TOP 1 COUNT(awards.id) as counter, software_houses.id
+from software_houses JOIN videogames ON software_houses.id = videogames.software_house_id
+	JOIN award_videogame ON award_videogame.videogame_id = videogames.id
+	JOIN awards ON award_videogame.award_id = awards.id
+where award_videogame.year >= 2015 AND award_videogame.year <= 2016
+group by software_houses.id
+order by counter desc;
+
 
 -- 13 Selezionare le categorie dei videogame i quali hanno una media recensioni inferiore a 1.5 (10)
+select  ROUND(AVG(Cast(reviews.rating as Float )) ,2), categories.name, categories.id
+from videogames JOIN category_videogame ON category_videogame.videogame_id = videogames.id
+	JOIN categories ON categories.id = category_videogame.category_id
+	JOIN reviews ON reviews.videogame_id = videogames.id
+group by reviews.videogame_id, categories.name , categories.id
+having ROUND(AVG(Cast(reviews.rating as Float )) ,2) < 1.5;
